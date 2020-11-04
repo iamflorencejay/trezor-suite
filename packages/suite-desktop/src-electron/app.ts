@@ -37,8 +37,6 @@ global.resourcesPath = isDev
     ? path.join(__dirname, '..', 'public', 'static')
     : process.resourcesPath;
 
-logger.info('main', 'Application starting');
-
 const init = async () => {
     buildInfo();
     await computerInfo();

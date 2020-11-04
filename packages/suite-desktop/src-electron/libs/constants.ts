@@ -10,6 +10,7 @@ export const MODULES = [
     'event-logging/contents',
     // Standard modules
     'crash-recover',
+    'hang-detect',
     'menu',
     'shortcuts',
     'request-filter',
@@ -20,6 +21,7 @@ export const MODULES = [
     'bridge',
     'tor',
     'analytics',
+    'custom-protocols',
     'auto-updater',
     'store',
 ];
