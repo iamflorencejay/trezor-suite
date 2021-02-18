@@ -1,7 +1,7 @@
 import React, { ButtonHTMLAttributes } from 'react';
 import { variables } from '@trezor/components';
 import styled from 'styled-components';
-import { resolveStaticPath } from '@suite-utils/nextjs';
+import { resolveStaticPath } from '@suite-utils/build';
 
 const Wrapper = styled.button`
     display: flex;

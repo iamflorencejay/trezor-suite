@@ -4,7 +4,7 @@ import * as guideActions from '@suite-actions/guideActions';
 import { useActions, useDevice } from '@suite-hooks';
 import styled from 'styled-components';
 import { variables } from '@trezor/components';
-import { resolveStaticPath } from '@suite-utils/nextjs';
+import { resolveStaticPath } from '@suite-utils/build';
 import { getFwVersion } from '@suite-utils/device';
 import { ViewWrapper, Header, Content } from '@guide-components';
 

@@ -13,14 +13,6 @@ import suiteMiddleware from '@suite-middlewares/suiteMiddleware';
 import routes from '@suite-constants/routes';
 import { Action } from '@suite-types';
 
-jest.mock('next/router', () => ({
-    __esModule: true, // this property makes it work
-    default: {
-        push: () => {},
-        pathname: '/',
-    },
-}));
-
 type SuiteState = ReturnType<typeof suiteReducer>;
 type RouterState = ReturnType<typeof routerReducer>;
 
@@ -112,7 +104,7 @@ describe('suite middleware', () => {
     describe('redirection on initial run', () => {
         it('if initialRun is true, should redirect to onboarding screen after STORAGE.LOADED action', () => {
             // eslint-disable-next-line global-require
-            require('next/router').default.pathname = '/accounts';
+            require('@suite/support/history').default.location.pathname = '/accounts';
 
             const store = initStore(getInitialState());
 
@@ -143,7 +135,7 @@ describe('suite middleware', () => {
 
         it('if route is modal window, should not redirect and show modal directly', () => {
             // eslint-disable-next-line global-require
-            require('next/router').default.pathname = '/version';
+            require('@suite/support/history').default.location.pathname = '/version';
 
             const store = initStore(getInitialState());
 
@@ -175,7 +167,7 @@ describe('suite middleware', () => {
         it('if route is 404, should not redirect and show modal directly', () => {
             const goto = jest.spyOn(routerActions, 'goto');
             // eslint-disable-next-line global-require
-            require('next/router').default.pathname = '/foo-bar';
+            require('@suite/support/history').default.location.pathname = '/foo-bar';
 
             const store = initStore(getInitialState());
 
@@ -201,7 +193,7 @@ describe('suite middleware', () => {
         it('if initialRun is false should NOT redirect to onboarding after STORAGE.LOADED action', () => {
             const goto = jest.spyOn(routerActions, 'goto');
             // eslint-disable-next-line global-require
-            require('next/router').default.pathname = '/';
+            require('@suite/support/history').default.location.pathname = '/';
 
             const store = initStore(getInitialState());
             store.dispatch({
