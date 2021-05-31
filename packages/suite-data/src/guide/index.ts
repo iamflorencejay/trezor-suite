@@ -5,6 +5,8 @@ import { TMP, GB_SOURCE, GB_REVISION, DESTINATION, ASSETS_DIR } from './constant
 import { parse } from './parser';
 import { transform } from './transformer';
 
+// See /docs/misc/guide.md for documentation of this script.
+
 /**
  * Clears the TMP folder and then populates it with content of the
  * GB_SOURCE repository checked out at GB_REVISION commit.
