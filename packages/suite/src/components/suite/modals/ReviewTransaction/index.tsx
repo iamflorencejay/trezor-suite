@@ -38,21 +38,20 @@ const ReviewTransaction = ({ decision }: Props) => {
         return null;
 
     const { networkType } = selectedAccount.account;
-    const rbfAvailable =
-        networkType === 'bitcoin' &&
-        precomposedTx.prevTxid &&
-        !device.unavailableCapabilities?.replaceTransaction;
+    const decreaseOutputId = precomposedTx.useNativeRbf
+        ? precomposedForm.setMaxOutputId
+        : undefined;
 
     const outputs: OutputProps[] = [];
-    if (precomposedTx.prevTxid && rbfAvailable) {
+    if (precomposedTx.useNativeRbf && precomposedForm.rbfParams) {
         // calculate fee difference
         const diff = new BigNumber(precomposedTx.fee)
-            .minus(precomposedForm.rbfParams?.baseFee || 0)
+            .minus(precomposedForm.rbfParams.baseFee)
             .toFixed();
         outputs.push(
             {
                 type: 'txid',
-                value: precomposedTx.prevTxid,
+                value: precomposedForm.rbfParams.txid,
             },
             {
                 type: 'fee-replace',
@@ -60,6 +59,16 @@ const ReviewTransaction = ({ decision }: Props) => {
                 value2: precomposedTx.fee,
             },
         );
+
+        // add decrease output confirmation step between txid and fee
+        if (typeof decreaseOutputId === 'number') {
+            outputs.splice(1, 0, {
+                type: 'reduce-output',
+                label: precomposedTx.transaction.outputs[decreaseOutputId].address!,
+                value: diff,
+                value2: precomposedTx.transaction.outputs[decreaseOutputId].amount!,
+            });
+        }
     } else {
         precomposedTx.transaction.outputs.forEach(o => {
             if (typeof o.address === 'string') {
@@ -98,7 +107,7 @@ const ReviewTransaction = ({ decision }: Props) => {
                 value: precomposedForm.rippleDestinationTag,
             });
         }
-    } else if (!rbfAvailable) {
+    } else if (!precomposedTx.useNativeRbf) {
         outputs.push({ type: 'fee', value: precomposedTx.fee });
     }
 
@@ -106,6 +115,17 @@ const ReviewTransaction = ({ decision }: Props) => {
     const buttonRequests = device.buttonRequests.filter(
         r => r === 'ButtonRequest_ConfirmOutput' || r === 'ButtonRequest_SignTx',
     );
+
+    // NOTE: T1 edge-case
+    // while confirming decrease amount 'ButtonRequest_ConfirmOutput' is called twice (confirm decrease address, confirm decrease amount)
+    // remove 1 additional element to keep it consistent with TT where this step is swipeable with one button request
+    if (
+        typeof decreaseOutputId === 'number' &&
+        device.features?.major_version === 1 &&
+        buttonRequests.filter(r => r === 'ButtonRequest_ConfirmOutput').length > 1
+    ) {
+        buttonRequests.splice(-1, 1);
+    }
 
     // changing fee rate using RBF
     const isRbfAction =
