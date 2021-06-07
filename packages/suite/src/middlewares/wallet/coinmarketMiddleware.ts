@@ -17,11 +17,15 @@ const coinmarketMiddleware = (api: MiddlewareAPI<Dispatch, AppState>) => (next: 
         const { buyInfo } = api.getState().wallet.coinmarket.buy;
         const { exchangeCoinInfo, exchangeInfo } = api.getState().wallet.coinmarket.exchange;
         const { sellInfo } = api.getState().wallet.coinmarket.sell;
+
+        const currentAccountDescriptor = invityAPI.getCurrentAccountDescriptor();
+        const isDifferentAccount = currentAccountDescriptor !== account?.descriptor;
+
         if (
             status === 'loaded' &&
             account &&
             !isLoading &&
-            lastLoadedTimestamp + InvityAPIReloadDataAfterMs < Date.now()
+            (isDifferentAccount || lastLoadedTimestamp + InvityAPIReloadDataAfterMs < Date.now())
         ) {
             api.dispatch(coinmarketCommonActions.setLoading(true));
 
@@ -34,7 +38,7 @@ const coinmarketMiddleware = (api: MiddlewareAPI<Dispatch, AppState>) => (next: 
 
             const loadPromises: Promise<void>[] = [];
 
-            if (!buyInfo) {
+            if (isDifferentAccount || !buyInfo) {
                 loadPromises.push(
                     coinmarketBuyActions.loadBuyInfo().then(buyInfo => {
                         api.dispatch(coinmarketBuyActions.saveBuyInfo(buyInfo));
@@ -42,7 +46,7 @@ const coinmarketMiddleware = (api: MiddlewareAPI<Dispatch, AppState>) => (next: 
                 );
             }
 
-            if (!exchangeInfo || !exchangeCoinInfo) {
+            if (isDifferentAccount || !exchangeInfo || !exchangeCoinInfo) {
                 loadPromises.push(
                     coinmarketExchangeActions
                         .loadExchangeInfo()
@@ -55,7 +59,7 @@ const coinmarketMiddleware = (api: MiddlewareAPI<Dispatch, AppState>) => (next: 
                 );
             }
 
-            if (!sellInfo) {
+            if (isDifferentAccount || !sellInfo) {
                 loadPromises.push(
                     coinmarketSellActions.loadSellInfo().then(sellInfo => {
                         api.dispatch(coinmarketSellActions.saveSellInfo(sellInfo));
