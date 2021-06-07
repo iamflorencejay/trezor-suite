@@ -18,6 +18,9 @@ export type CoinmarketCommonAction =
           type: typeof COINMARKET_COMMON.SET_LOADING;
           isLoading: boolean;
           lastLoadedTimestamp: number;
+      }
+    | {
+          type: typeof COINMARKET_COMMON.LOAD_DATA;
       };
 
 export const verifyAddress = (account: Account, inExchange = false) => async (
@@ -133,11 +136,12 @@ export const submitRequestForm = (form?: {
     }
 };
 
-export const setLoading = (isLoading: boolean, lastLoadedTimestamp?: number) => (
-    dispatch: Dispatch,
-) =>
-    dispatch({
-        type: COINMARKET_COMMON.SET_LOADING,
-        isLoading,
-        lastLoadedTimestamp,
-    });
+export const setLoading = (isLoading: boolean, lastLoadedTimestamp?: number) => ({
+    type: COINMARKET_COMMON.SET_LOADING,
+    isLoading,
+    ...(lastLoadedTimestamp && { lastLoadedTimestamp }),
+});
+
+export const loadInvityData = () => ({
+    type: COINMARKET_COMMON.LOAD_DATA,
+});

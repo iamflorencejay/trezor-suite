@@ -2,85 +2,13 @@ import { useEffect, useState } from 'react';
 import { BuyTradeStatus, ExchangeTradeStatus, SellTradeStatus } from 'invity-api';
 import useUnmount from 'react-use/lib/useUnmount';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
-import { useSelector, useActions } from '@suite-hooks';
+import { useActions } from '@suite-hooks';
 import invityAPI from '@suite-services/invityAPI';
-import * as coinmarketCommonActions from '@wallet-actions/coinmarket/coinmarketCommonActions';
 import * as coinmarketBuyActions from '@wallet-actions/coinmarketBuyActions';
 import * as coinmarketExchangeActions from '@wallet-actions/coinmarketExchangeActions';
 import * as coinmarketSellActions from '@wallet-actions/coinmarketSellActions';
 import { Account } from '@wallet-types';
 import { TradeBuy, TradeSell, TradeExchange } from '@wallet-types/coinmarketCommonTypes';
-import { InvityAPIReloadDataAfterMs } from '@wallet-constants/coinmarket/metadata';
-
-export const useInvityAPI = () => {
-    const {
-        selectedAccount,
-        buyInfo,
-        exchangeInfo,
-        sellInfo,
-        invityAPIUrl,
-        exchangeCoinInfo,
-        isLoading,
-        lastLoadedTimestamp,
-    } = useSelector(state => ({
-        selectedAccount: state.wallet.selectedAccount,
-        buyInfo: state.wallet.coinmarket.buy.buyInfo,
-        exchangeInfo: state.wallet.coinmarket.exchange.exchangeInfo,
-        sellInfo: state.wallet.coinmarket.sell.sellInfo,
-        invityAPIUrl: state.suite.settings.debug.invityAPIUrl,
-        exchangeCoinInfo: state.wallet.coinmarket.exchange.exchangeCoinInfo,
-        isLoading: state.wallet.coinmarket.isLoading,
-        lastLoadedTimestamp: state.wallet.coinmarket.lastLoadedTimestamp,
-    }));
-
-    const {
-        saveBuyInfo,
-        saveExchangeInfo,
-        saveExchangeCoinInfo,
-        saveSellInfo,
-        setIsLoading,
-    } = useActions({
-        saveBuyInfo: coinmarketBuyActions.saveBuyInfo,
-        saveExchangeInfo: coinmarketExchangeActions.saveExchangeInfo,
-        saveExchangeCoinInfo: coinmarketExchangeActions.saveExchangeCoinInfo,
-        saveSellInfo: coinmarketSellActions.saveSellInfo,
-        setIsLoading: coinmarketCommonActions.setLoading,
-    });
-
-    if (selectedAccount.status === 'loaded') {
-        if (invityAPIUrl) {
-            invityAPI.setInvityAPIServer(invityAPIUrl);
-        }
-
-        invityAPI.createInvityAPIKey(selectedAccount.account.descriptor);
-
-        if (!isLoading && lastLoadedTimestamp + InvityAPIReloadDataAfterMs < Date.now()) {
-            setIsLoading(true);
-            Promise.all([
-                coinmarketBuyActions.loadBuyInfo(),
-                coinmarketExchangeActions.loadExchangeInfo(),
-                coinmarketSellActions.loadSellInfo(),
-            ])
-                .then(([buyInfoResult, [exchangeInfo, exchangeCoinInfo], sellInfoResult]) => {
-                    setIsLoading(false, Date.now());
-                    saveBuyInfo(buyInfoResult);
-                    saveExchangeInfo(exchangeInfo);
-                    saveExchangeCoinInfo(exchangeCoinInfo);
-                    saveSellInfo(sellInfoResult);
-                })
-                .catch(() => {
-                    setIsLoading(false);
-                });
-        }
-    }
-
-    return {
-        buyInfo,
-        exchangeInfo,
-        exchangeCoinInfo,
-        sellInfo,
-    };
-};
 
 const BuyTradeFinalStatuses: BuyTradeStatus[] = ['SUCCESS', 'ERROR', 'BLOCKED'];
 
