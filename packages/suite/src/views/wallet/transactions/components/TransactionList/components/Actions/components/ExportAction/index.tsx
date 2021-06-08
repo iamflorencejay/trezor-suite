@@ -31,6 +31,7 @@ const ExportAction = ({ account }: Props) => {
 
             setIsExportRunning(true);
             try {
+                // todo: btw wouldn't it be better to call this inside action 'exportTransaction' ? just asking
                 await fetchTransactions(account, 2, SETTINGS.TXS_PER_PAGE, true, true);
                 const accountName =
                     account.metadata.accountLabel ||

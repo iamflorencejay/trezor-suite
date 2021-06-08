@@ -1,4 +1,4 @@
-import { AccountTransaction } from 'trezor-connect';
+import { AccountTransaction, TransactionTarget } from 'trezor-connect';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
@@ -7,11 +7,16 @@ import { trezorLogo } from '@suite-constants/b64images';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
+// todo: any way how to write it nicer?
+type AccountTransactionWithMetadata = Omit<AccountTransaction, 'targets'> & {
+    targets: (TransactionTarget & { metadataLabel?: string })[];
+};
+
 type Data = {
     coin: Network['symbol'];
     accountName: string;
     type: 'csv' | 'pdf' | 'json';
-    transactions: AccountTransaction[];
+    transactions: AccountTransactionWithMetadata[];
 };
 
 type Field = { [key: string]: string };
@@ -66,7 +71,10 @@ const prepareContent = (data: Data) => {
         } else {
             addresses = t.targets.map(target => {
                 if (target?.addresses?.length && target?.amount) {
-                    return `${target.addresses[0]} (${target.amount})`;
+                    // todo: no idea how it should look like, but data is available here
+                    return `${target.addresses[0]}${
+                        target.metadataLabel ? `[${target.metadataLabel}]` : ''
+                    } (${target.amount})`;
                 }
 
                 return null;
@@ -103,7 +111,11 @@ const prepareCsv = (fields: Field, content: any[]) => {
         line = [];
 
         fieldKeys.forEach(k => {
-            line.push(c[k]);
+            let cell = c[k];
+            if (cell.includes(',')) {
+                cell = `"${cell}"`;
+            }
+            line.push(cell);
         });
 
         lines.push(line.join(CSV_SEPARATOR));
