@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import { Translation } from '@suite-components';
-import { useActions, useDevice } from '@suite-hooks';
+import { useActions, useDevice, useSelector } from '@suite-hooks';
 import { Textarea, Select, variables } from '@trezor/components';
 import * as guideActions from '@suite-actions/guideActions';
 import { ViewWrapper, Header, Content } from '@guide-components';
@@ -131,12 +131,47 @@ const ratingOptions: RatingItem[] = [
     },
 ];
 
+type FeedbackCategory = {
+    label: string;
+    value: Category;
+};
+
+const feedbackCategories: FeedbackCategory[] = [
+    { label: 'Dashboard', value: 'dashboard' },
+    { label: 'Accounts', value: 'account' },
+    { label: 'Settings', value: 'settings' },
+    { label: 'Send', value: 'send' },
+    { label: 'Receive', value: 'receive' },
+    { label: 'Trade', value: 'trade' },
+    { label: 'Other', value: 'other' },
+];
+
+// Router apps does not match 1:1 to Feedback Categories
+const getDefaultCategory = (category: string): FeedbackCategory => {
+    switch (category) {
+        case 'dashboard':
+        case 'start':
+            return feedbackCategories.filter(item => item.value === 'dashboard')[0];
+        case 'settings':
+        case 'version':
+        case 'bridge':
+            return feedbackCategories.filter(item => item.value === 'settings')[0];
+        case 'wallet':
+            return feedbackCategories.filter(item => item.value === 'send')[0];
+        case 'portfolio':
+            return feedbackCategories.filter(item => item.value === 'trade')[0];
+        default:
+            return feedbackCategories.filter(item => item.value === 'other')[0];
+    }
+};
+
 const Feedback = ({ type }: Props) => {
     const { device } = useDevice();
     const { setView, sendFeedback } = useActions({
         setView: guideActions.setView,
         sendFeedback: guideActions.sendFeedback,
     });
+    const feedbackSection = useSelector(state => state.router.app);
     const [description, setDescription] = React.useState('');
     const [rating, setRating] = React.useState<RatingItem>();
     const [category, setCategory] = React.useState<Category>('dashboard');
@@ -208,21 +243,11 @@ const Feedback = ({ type }: Props) => {
                         <SelectWrapper>
                             <Select
                                 isSearchable={false}
-                                defaultValue={{ label: 'Dashboard', value: 'dashboard' }}
-                                options={[
-                                    { label: 'Dashboard', value: 'dashboard' },
-                                    { label: 'Accounts', value: 'account' },
-                                    { label: 'Settings', value: 'settings' },
-                                    { label: 'Send', value: 'send' },
-                                    { label: 'Receive', value: 'receive' },
-                                    { label: 'Trade', value: 'trade' },
-                                    { label: 'Other', value: 'other' },
-                                ]}
+                                defaultValue={getDefaultCategory(feedbackSection)}
+                                options={feedbackCategories}
                                 borderWidth={1}
                                 borderRadius={8}
-                                onChange={(option: { value: Category; label: string }) =>
-                                    setCategory(option.value)
-                                }
+                                onChange={(option: FeedbackCategory) => setCategory(option.value)}
                                 noTopLabel
                             />
                         </SelectWrapper>
