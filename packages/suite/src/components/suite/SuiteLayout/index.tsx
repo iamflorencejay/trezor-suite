@@ -1,6 +1,7 @@
 import React, { useState, createContext } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { variables, scrollbarStyles } from '@trezor/components';
 import SuiteBanners from '@suite-components/Banners';
 import { AppState } from '@suite-types';
@@ -157,12 +158,26 @@ type SuiteLayoutProps = Omit<Props, 'menu' | 'appMenu'>;
 const SuiteLayout = (props: SuiteLayoutProps) => {
     // TODO: if (props.layoutSize === 'UNAVAILABLE') return <SmallLayout />;
     const { isMobileLayout } = useLayoutSize();
-    const { guideOpen } = useSelector(state => ({
-        guideOpen: state.guide.open,
+    const { isGuideOpen } = useSelector(state => ({
+        isGuideOpen: state.guide.open,
     }));
-    const { openGuide } = useActions({
+    const { openGuide, closeGuide } = useActions({
         openGuide: guideActions.open,
+        closeGuide: guideActions.close,
     });
+    useHotkeys(
+        'f1',
+        e => {
+            e.preventDefault();
+            if (isGuideOpen) {
+                closeGuide();
+            } else {
+                openGuide();
+            }
+        },
+        {},
+        [isGuideOpen],
+    );
     const [title, setTitle] = useState<string | undefined>(undefined);
     const [menu, setMenu] = useState<any>(undefined);
     const [appMenu, setAppMenu] = useState<any>(undefined);
@@ -187,7 +202,7 @@ const SuiteLayout = (props: SuiteLayoutProps) => {
                         menu={menu}
                         appMenu={appMenu}
                         url={props.router.url}
-                        guideOpen={guideOpen}
+                        guideOpen={isGuideOpen}
                     >
                         {props.children}
                     </BodyWide>
