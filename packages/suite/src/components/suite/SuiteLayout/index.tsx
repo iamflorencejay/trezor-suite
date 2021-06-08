@@ -1,5 +1,5 @@
 import React, { useState, createContext } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { connect } from 'react-redux';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { variables, scrollbarStyles } from '@trezor/components';
@@ -28,15 +28,29 @@ const Body = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
 `;
 
 // AppWrapper and MenuSecondary creates own scrollbars independently
-const Columns = styled.div`
+const Columns = styled.div<{ menuSecondaryOpen?: boolean; guideOpen?: boolean }>`
     display: flex;
     flex-direction: row;
     flex: 1 0 100%;
     overflow: auto;
+    padding: 0;
+    transition: all 0.3s ease;
+
+    ${props =>
+        props.menuSecondaryOpen &&
+        css`
+            padding: 0 0 0 ${variables.LAYOUT_SIZE.MENU_SECONDARY_WIDTH};
+        `}
+
+    ${props =>
+        props.guideOpen &&
+        css`
+            padding: 0 ${variables.LAYOUT_SIZE.GUIDE_PANEL_WIDTH} 0 0;
+        `}
 `;
 
 const AppWrapper = styled.div`
@@ -76,11 +90,36 @@ const DefaultPaddings = styled.div`
     }
 `;
 
-const StyledGuidePanel = styled(GuidePanel)`
+const StyledMenuSecondary = styled(MenuSecondary)<{ open: boolean }>`
+    position: absolute;
+    z-index: ${variables.Z_INDEX.GUIDE_PANEL};
+    left: 0;
+    transform: translateX(-100%);
+    transition: all 0.3s ease;
+
+    ${props =>
+        props.open &&
+        css`
+            transform: translateX(0);
+        `}
+`;
+
+const StyledGuidePanel = styled(GuidePanel)<{ open: boolean }>`
     height: 100%;
     width: ${variables.LAYOUT_SIZE.GUIDE_PANEL_WIDTH};
     flex: 0 0 ${variables.LAYOUT_SIZE.GUIDE_PANEL_WIDTH};
     z-index: ${variables.Z_INDEX.GUIDE_PANEL};
+    border-left: 1px solid ${props => props.theme.STROKE_GREY};
+    position: absolute;
+    right: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+
+    ${props =>
+        props.open &&
+        css`
+            transform: translateX(0);
+        `}
 `;
 
 const mapStateToProps = (state: AppState) => ({
@@ -129,15 +168,15 @@ const ScrollAppWrapper = ({ url, children }: ScrollAppWrapperProps) => {
 
 const BodyWide = ({ url, menu, appMenu, children, guideOpen }: BodyProps) => (
     <Body>
-        <Columns>
-            {menu && !guideOpen && <MenuSecondary>{menu}</MenuSecondary>}
+        <Columns menuSecondaryOpen={!!menu} guideOpen={guideOpen}>
+            {menu && <StyledMenuSecondary open={!guideOpen}>{menu}</StyledMenuSecondary>}
             <ScrollAppWrapper url={url}>
                 {appMenu}
                 <DefaultPaddings>
                     <MaxWidthWrapper>{children}</MaxWidthWrapper>
                 </DefaultPaddings>
             </ScrollAppWrapper>
-            {guideOpen && <StyledGuidePanel />}
+            <StyledGuidePanel open={guideOpen} />
         </Columns>
     </Body>
 );
