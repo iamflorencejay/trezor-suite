@@ -1,7 +1,7 @@
 import { join } from 'path';
 import * as fs from 'fs-extra';
 import simpleGit from 'simple-git';
-import { TMP, GB_SOURCE, GB_REVISION, DESTINATION, ASSETS_DIR } from './constants';
+import { TMP, GITBOOK_SOURCE, GITBOOK_REVISION, DESTINATION, ASSETS_DIR } from './constants';
 import { parse } from './parser';
 import { transform } from './transformer';
 
@@ -21,8 +21,8 @@ const fetchSource = async () => {
     pruneDirectory(TMP);
     // Run all subsequent git commands in the TMP directory.
     const git = simpleGit({ baseDir: TMP });
-    await git.clone(GB_SOURCE, '.');
-    await git.checkout(GB_REVISION);
+    await git.clone(GITBOOK_SOURCE, '.');
+    await git.checkout(GITBOOK_REVISION);
 };
 
 const main = async () => {
