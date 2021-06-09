@@ -14,20 +14,20 @@ const pruneDirectory = (path: string) => {
 };
 
 /**
- * Clears the TMP folder and then populates it with content of the
- * GB_SOURCE repository checked out at GB_REVISION commit.
+ * Clears the destination folder and then populates it with content of the
+ * repository repository checked out at revision commit.
  */
-const fetchSource = async () => {
-    pruneDirectory(TMP);
+const fetchSource = async (repository: string, revision: string, destination: string) => {
+    pruneDirectory(destination);
     // Run all subsequent git commands in the TMP directory.
-    const git = simpleGit({ baseDir: TMP });
-    await git.clone(GITBOOK_SOURCE, '.');
-    await git.checkout(GITBOOK_REVISION);
+    const git = simpleGit({ baseDir: destination });
+    await git.clone(repository, '.');
+    await git.checkout(revision);
 };
 
 const main = async () => {
     // Fetch content from GitBook mirror.
-    await fetchSource();
+    await fetchSource(GITBOOK_SOURCE, GITBOOK_REVISION, TMP);
     // Parse content tree.
     const index = parse();
 
