@@ -32,9 +32,9 @@ const main = async () => {
     const parser = new Parser(TMP);
     const index = parser.parse();
 
-    pruneDirectory(DESTINATION);
     // Transform the markdown and copy it to the DESTINATION.
-    transform(index);
+    pruneDirectory(DESTINATION);
+    transform(index, TMP, DESTINATION);
 
     fs.writeJSONSync(join(DESTINATION, 'index.json'), index);
     fs.copySync(join(TMP, ASSETS_DIR), join(DESTINATION, ASSETS_DIR));
