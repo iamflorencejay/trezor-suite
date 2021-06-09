@@ -20,8 +20,8 @@ const config = {
     ],
     'suite-native': [
         'fonts',
-        'images',
         'guide',
+        'images',
         'message-system',
         'videos',
     ],
