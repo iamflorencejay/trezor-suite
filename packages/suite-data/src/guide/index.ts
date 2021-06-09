@@ -7,6 +7,12 @@ import { transform } from './transformer';
 
 // See /docs/misc/guide.md for documentation of this script.
 
+/** Ensures the given directory exists and prunes its contents. */
+const pruneDirectory = (path: string) => {
+    fs.removeSync(path);
+    fs.mkdirpSync(path);
+}
+
 /**
  * Clears the TMP folder and then populates it with content of the
  * GB_SOURCE repository checked out at GB_REVISION commit.
@@ -18,12 +24,6 @@ const fetchSource = async () => {
     await git.clone(GB_SOURCE, '.');
     await git.checkout(GB_REVISION);
 };
-
-/** Ensures the given directory exists and prunes its contents. */
-const pruneDirectory = (path: string) => {
-    fs.removeSync(path);
-    fs.mkdirpSync(path);
-}
 
 const main = async () => {
     // Fetch content from GitBook mirror.
