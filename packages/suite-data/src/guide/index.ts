@@ -11,7 +11,7 @@ import { transform } from './transformer';
 const pruneDirectory = (path: string) => {
     fs.removeSync(path);
     fs.mkdirpSync(path);
-}
+};
 
 /**
  * Clears the TMP folder and then populates it with content of the
